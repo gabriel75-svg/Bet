@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copa do Mundo 2026 - Simulador Completo (104 Jogos)</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #030a16;
+            color: #ffffff;
+            
+            /* DECORAÇÃO DE FUNDO OFICIAL COPA 2026 SUPER ESTILIZADA */
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(0, 0, 0, 0.3), transparent 55%),
+                radial-gradient(circle at 85% 15%, rgb(0, 0, 0), transparent 55%),
+                radial-gradient(circle at 50% 85%, rgb(0, 0, 0), transparent 65%),
+                linear-gradient(rgb(0, 0, 0) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(0, 0, 0) 1px, transparent 1px),
+                linear-gradient(135deg, #000000 0%, #000000 100%);
+            
+            background-size: cover, cover, cover, 50px 50px, 50px 50px, cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 15px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .cup-logo {
+            display: inline-block;
+            background: linear-gradient(135deg, #fdfdfd, #ffffff, #ffffff);
+            color: #030a16;
+            font-weight: 900;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        header h1 {
+            font-size: 2.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 5px 0;
+            font-weight: 900;
+        }
+
+        header h1 span {
+            color: #ffffff;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #9cb3c9;
+            margin: 0;
+        }
+
+        /* Dashboard de Saldo */
+        .dashboard {
+            display: table;
+            width: 100%;
+            margin-bottom: 30px;
+            background: rgba(8, 20, 38, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+        }
+
+        .dash-col {
+            display: table-cell;
+            width: 50%;
+            vertical-align: middle;
+            padding: 0 20px;
+        }
+
+        .dash-col:first-child {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .balance-box .label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #9cb3c9;
+            letter-spacing: 2px;
+        }
+
+        .balance-box .value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffffff;
+            margin-top: 5px;
+        }
+
+        .stats-box {
+            display: table;
+            width: 100%;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: table-cell;
+            width: 33.33%;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .stat-val.green { color: #00ff88; }
+        .stat-val.red { color: #ff4a4a; }
+
+        .stat-lbl {
+            font-size: 0.75rem;
+            color: #9cb3c9;
+            text-transform: uppercase;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        /* Layout Grid */
+        .main-layout {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .layout-left, .layout-right {
+            display: table-cell;
+            vertical-align: top;
+        }
+
+        .layout-left {
+            width: 55%;
+            padding-right: 15px;
+        }
+
+        .layout-right {
+            width: 45%;
+            padding-left: 15px;
+        }
+
+        .card {
+            background: rgba(8, 20, 38, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #00f2fe;
+            border-bottom: 2px solid rgba(0, 242, 254, 0.15);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #9cb3c9;
+            font-weight: 600;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            background: rgba(4, 10, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        select:focus, input[type="number"]:focus {
+            border-color: #00f2fe;
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+        }
+
+        optgroup {
+            background: #051427;
+            color: #00f2fe;
+            font-weight: bold;
+        }
+
+        optgroup option {
+            color: #fff;
+            font-weight: normal;
+        }
+
+        /* Botões 1X2 */
+        .odds-row {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: separate;
+            border-spacing: 8px 0;
+            margin-top: 10px;
+        }
+
+        .odd-card {
+            display: table-cell;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 12px 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .odd-card:hover {
+            background: rgba(144, 12, 232, 0.15);
+            border-color: #900ce8;
+        }
+
+        .odd-card.active {
+            background: linear-gradient(135deg, #00ff88, #00f2fe) !important;
+            color: #030a16 !important;
+            border-color: #00ff88;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .odd-lbl {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .odd-val {
+            font-size: 1.15rem;
+            font-weight: 800;
+        }
+
+        .btn-bet {
+            width: 100%;
+            background: linear-gradient(135deg, #900ce8, #00f2fe);
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(144, 12, 232, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-bet:hover {
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-bet:disabled {
+            background: #1c2633;
+            color: #4f6175;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Campo de Simulação Animado */
+        .pitch-simulation {
+            background: rgba(3, 10, 22, 0.95);
+            border: 1px dashed #00ff88;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.05);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #00ff88;
+            border-bottom-color: #00f2fe;
+            margin: 0 auto 12px auto;
+            animation: rotate 0.8s infinite linear;
+        }
+
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+        /* Histórico de Bilhetes */
+        .ticket-list {
+            max-height: 460px;
+            overflow-y: auto;
+        }
+
+        .ticket-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .ticket-item:last-child { border-bottom: none; }
+
+        .t-match { font-weight: bold; color: #fff; margin-bottom: 4px; }
+        .t-details { color: #9cb3c9; font-size: 0.8rem; }
+        .t-badge {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+        .bg-green { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid #00ff88; }
+        .bg-red { background: rgba(255, 74, 74, 0.15); color: #ff4a4a; border: 1px solid #ff4a4a; }
+
+        @media (max-width: 850px) {
+            .main-layout, .dashboard, .odds-row { display: block; width: 100%; }
+            .layout-left, .layout-right, .dash-col, .odd-card { display: block; width: 100%; padding: 0; margin-bottom: 15px; }
+            .layout-left { padding-right: 0; }
+            .layout-right { padding-left: 0; }
+            .dash-col:first-child { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        }
+
+        footer {
+            background-color: #000000; 
+            color: white;
+            text-align: center;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="cup-logo">FIFA WORLD CUP 2026</div>
+        <h1>BET <span>Copa do Mundo 2026</span></h1>
+        <p>104 confrontos da Fase de Grupos até à Grande Final</p>
+    </header>
+
+    <!-- BANCA INTERATIVA -->
+    <div class="dashboard">
+        <div class="dash-col">
+            <div class="balance-box">
+                <div class="label">Banca de Apostas</div>
+                <div class="value" id="balance">R$ 500,00</div>
+            </div>
+        </div>
+        <div class="dash-col">
+            <div class="stats-box">
+                <div class="stat-item">
+                    <div class="stat-val" id="st-bets">0</div>
+                    <div class="stat-lbl">Apostas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val green" id="st-wins">0</div>
+                    <div class="stat-lbl">Ganhas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-val red" id="st-losses">0</div>
+                    <div class="stat-lbl">Perdidas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <!-- FORMULÁRIO DE APOSTAS -->
+        <div class="layout-left">
+            <div class="card">
+                <h2>Criar Aposta</h2>
+                
+                <div class="form-group">
+                    <label for="match-selector">Escolha a Partida (104 Jogos):</label>
+                    <select id="match-selector" onchange="renderOdds()">
+                        <!-- Gerado programaticamente por JS para conter todos os grupos -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mercado Disponível: Vencedor do Encontro</label>
+                    <div class="odds-row">
+                        <div class="odd-card" id="card-A" onclick="pick('A')">
+                            <span class="odd-lbl" id="name-A">Casa</span>
+                            <span class="odd-val" id="val-A">1.00</span>
+                        </div>
+                        <div class="odd-card" id="card-X" onclick="pick('X')">
+                            <span class="odd-lbl">Empate</span>
+                            <span class="odd-val" id="val-X">1.00</span>
+                        </div>
+                        <div class="odd-card" id="card-B" onclick="pick('B')">
+                            <span class="odd-lbl" id="name-B">Fora</span>
+                            <span class="odd-val" id="val-B">1.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bet-value">Montante da Aposta (R$):</label>
+                    <input type="number" id="bet-value" min="5" value="50" step="5" oninput="calcWin()">
+                    <div style="margin-top: 10px; font-size: 0.85rem; color: #9cb3c9; text-align: right;">
+                        Retorno Estimado: <span id="est-return" style="color: #00ff88; font-weight: bold;">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <button class="btn-bet" id="btn-submit-bet" onclick="placeBet()">Validar Aposta</button>
+
+                <div class="pitch-simulation" id="pitch-sim">
+                    <div class="spinner"></div>
+                    <div style="color: #00f2fe; font-weight: bold; font-size: 0.95rem;">PARTIDA EM ANDAMENTO...</div>
+                    <div style="color: #9cb3c9; font-size: 0.8rem; margin-top: 4px;">A calcular simulação estatística tática da FIFA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTÓRICO DE BILHETES -->
+        <div class="layout-right">
+            <div class="card" style="min-height: 430px;">
+                <h2>Apostas</h2>
+                <div id="no-tickets" style="color:#4f6175; text-align:center; padding:60px 0; font-style:italic;">
+                    Nenhum boletim submetido.
+                </div>
+                <div class="ticket-list" id="ticket-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Gerador de Banco de Dados de Jogos da Copa 2026 (104 Jogos Simulados com Odds Realistas)
+    const database = {};
+    const grupos = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+    const selecoesPorGrupo = {
+  "A": ["México", "África do Sul", "Coreia do Sul", "República Tcheca"],
+  "B": ["Canadá", "Bósnia e Herzegovina", "Catar", "Suíça"],
+  "C": ["Brasil", "Marrocos", "Haiti", "Escócia"],
+  "D": ["Estados Unidos", "Paraguai", "Austrália", "Turquia"],
+  "E": ["Alemanha", "Curaçao", "Costa do Marfim", "Equador"],
+  "F": ["Holanda", "Japão", "Suécia", "Tunísia"],
+  "G": ["Bélgica", "Egito", "Irã", "Nova Zelândia"],
+  "H": ["Espanha", "Cabo Verde", "Arábia Saudita", "Uruguai"],
+  "I": ["França", "Senegal", "Iraque", "Noruega"],
+  "J": ["Argentina", "Argélia", "Áustria", "Jordânia"],
+  "K": ["Portugal", "RD Congo", "Uzbequistão", "Colômbia"],
+  "L": ["Inglaterra", "Croácia", "Gana", "Panamá"]
+    };
+
+    let globalMatchList = [];
+    let matchCounter = 1;
+
+    // Gerar Rodadas da Fase de Grupos (3 rodadas por grupo x 2 jogos = 6 jogos por grupo x 12 grupos = 72 jogos)
+    grupos.forEach(g => {
+        const s = selecoesPorGrupo[g];
+        // Rodada 1
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R1`, teamA: s[0], teamB: s[1], oddA: 1.85, oddX: 3.40, oddB: 4.20 });
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R1`, teamA: s[2], teamB: s[3], oddA: 1.65, oddX: 3.60, oddB: 5.10 });
+        // Rodada 2
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R2`, teamA: s[0], teamB: s[2], oddA: 1.55, oddX: 3.80, oddB: 6.00 });
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R2`, teamA: s[1], teamB: s[3], oddA: 2.00, oddX: 3.30, oddB: 3.65 });
+        // Rodada 3
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R3`, teamA: s[3], teamB: s[0], oddA: 7.50, oddX: 4.50, oddB: 1.38 });
+        globalMatchList.push({ id: matchCounter++, stage: `Grupo ${g} - R3`, teamA: s[1], teamB: s[2], oddA: 2.25, oddX: 3.20, oddB: 3.10 });
+    });
+
+    // Adicionar Fase Eliminatória Mata-Mata (32 jogos adicionais para totalizar 104 jogos)
+    for(let i=1; i<=16; i++) {
+        globalMatchList.push({ id: matchCounter++, stage: 'Dezasseis-avos de Final', teamA: `Vencedor M${i}`, teamB: `Segundo M${i+1}`, oddA: 2.10, oddX: 3.25, oddB: 3.40 });
+    }
+    for(let i=1; i<=8; i++) {
+        globalMatchList.push({ id: matchCounter++, stage: 'Oitavos de Final', teamA: `Finalista Oitavos A${i}`, teamB: `Finalista Oitavos B${i}`, oddA: 2.20, oddX: 3.20, oddB: 3.10 });
+    }
+    for(let i=1; i<=4; i++) {
+        globalMatchList.push({ id: matchCounter++, stage: 'Quartos de Final', teamA: `Semifinalista Q${i}`, teamB: `Semifinalista Q${i+1}`, oddA: 2.30, oddX: 3.10, oddB: 2.90 });
+    }
+    globalMatchList.push({ id: matchCounter++, stage: 'Semifinal 1', teamA: "Brasil", teamB: "França", oddA: 2.45, oddX: 3.10, oddB: 2.85 });
+    globalMatchList.push({ id: matchCounter++, stage: 'Semifinal 2', teamA: "Argentina", teamB: "Portugal", oddA: 2.35, oddX: 3.20, oddB: 3.00 });
+    globalMatchList.push({ id: matchCounter++, stage: '3º e 4º Lugar', teamA: "França", teamB: "Portugal", oddA: 2.10, oddX: 3.40, oddB: 3.25 });
+    globalMatchList.push({ id: matchCounter++, stage: 'GRANDE FINAL COPA 2026', teamA: "Brasil", teamB: "Argentina", oddA: 2.20, oddX: 3.15, oddB: 3.30 });
+
+    // Estado da App
+    let banca = 500.00;
+    let tApostas = 0, tGanhas = 0, tPerdidas = 0;
+    let escolha = null, oddAtual = 0;
+
+    window.onload = function() {
+        const select = document.getElementById("match-selector");
+        let currentGroup = "";
+        let groupOptGroup = null;
+
+        globalMatchList.forEach(m => {
+            if (m.stage !== currentGroup) {
+                currentGroup = m.stage;
+                groupOptGroup = document.createElement("optgroup");
+                groupOptGroup.label = currentGroup;
+                select.appendChild(groupOptGroup);
+            }
+            let opt = document.createElement("option");
+            opt.value = m.id;
+            opt.textContent = `Jogo ${m.id}: ${m.teamA} vs ${m.teamB}`;
+            groupOptGroup.appendChild(opt);
+        });
+
+        renderOdds();
+    };
+
+    function renderOdds() {
+        const mId = parseInt(document.getElementById("match-selector").value);
+        const match = globalMatchList.find(m => m.id === mId);
+        
+        if(match) {
+            document.getElementById("name-A").textContent = match.teamA;
+            document.getElementById("name-B").textContent = match.teamB;
+            document.getElementById("val-A").textContent = match.oddA.toFixed(2);
+            document.getElementById("val-X").textContent = match.oddX.toFixed(2);
+            document.getElementById("val-B").textContent = match.oddB.toFixed(2);
+        }
+        resetSelection();
+    }
+
+    function pick(tipo) {
+        document.getElementById("card-A").classList.remove("active");
+        document.getElementById("card-X").classList.remove("active");
+        document.getElementById("card-B").classList.remove("active");
+
+        escolha = tipo;
+        const mId = parseInt(document.getElementById("match-selector").value);
+        const match = globalMatchList.find(m => m.id === mId);
+
+        if(tipo === 'A') { document.getElementById("card-A").classList.add("active"); oddAtual = match.oddA; }
+        if(tipo === 'X') { document.getElementById("card-X").classList.add("active"); oddAtual = match.oddX; }
+        if(tipo === 'B') { document.getElementById("card-B").classList.add("active"); oddAtual = match.oddB; }
+
+        calcWin();
+    }
+
+    function resetSelection() {
+        document.getElementById("card-A").classList.remove("active");
+        document.getElementById("card-X").classList.remove("active");
+        document.getElementById("card-B").classList.remove("active");
+        escolha = null;
+        oddAtual = 0;
+        calcWin();
+    }
+
+    function calcWin() {
+        const val = parseFloat(document.getElementById("bet-value").value) || 0;
+        document.getElementById("est-return").textContent = escolha && val > 0 ? `R$ ${(val * oddAtual).toFixed(2)}` : "R$ 0,00";
+    }
+
+    function toggleUI(status) {
+        document.getElementById("btn-submit-bet").disabled = !status;
+        document.getElementById("match-selector").disabled = !status;
+        document.getElementById("bet-value").disabled = !status;
+        document.getElementById("pitch-sim").style.display = status ? "none" : "block";
+    }
+
+    function placeBet() {
+        const val = parseFloat(document.getElementById("bet-value").value) || 0;
+        if(!escolha) return alert("Selecione um resultado (Casa, Empate ou Fora)!");
+        if(val <= 0) return alert("Insira um valor válido de aposta.");
+        if(val > banca) return alert("Banca insuficiente!");
+
+        banca -= val;
+        document.getElementById("balance").textContent = `R$ ${banca.toFixed(2)}`;
+        toggleUI(false);
+
+        const mId = parseInt(document.getElementById("match-selector").value);
+        const match = globalMatchList.find(m => m.id === mId);
+
+        setTimeout(() => {
+            const r = Math.random();
+            let resultadoFinal = 'X';
+            if(r < 0.48) resultadoFinal = 'A';
+            else if(r > 0.76) resultadoFinal = 'B';
+
+            const venceu = (escolha === resultadoFinal);
+            let lucro = 0;
+
+            tApostas++;
+            if(venceu) {
+                tGanhas++;
+                lucro = val * oddAtual;
+                banca += lucro;
+            } else {
+                tPerdidas++;
+            }
+
+            document.getElementById("balance").textContent = `R$ ${banca.toFixed(2)}`;
+            document.getElementById("st-bets").textContent = tApostas;
+            document.getElementById("st-wins").textContent = tGanhas;
+            document.getElementById("st-losses").textContent = tPerdidas;
+
+            // Adicionar ao painel de bilhetes emitidos
+            const placeholder = document.getElementById("no-tickets");
+            if(placeholder) placeholder.remove();
+
+            let nomeRes = "Empate";
+            if(resultadoFinal === 'A') nomeRes = match.teamA;
+            if(resultadoFinal === 'B') nomeRes = match.teamB;
+
+            let meuPalpite = "Empate";
+            if(escolha === 'A') meuPalpite = match.teamA;
+            if(escolha === 'B') meuPalpite = match.teamB;
+
+            const list = document.getElementById("ticket-list");
+            const item = document.createElement("div");
+            item.className = "ticket-item";
+            item.innerHTML = `
+                <div class="t-match">[${match.stage}] ${match.teamA} vs ${match.teamB}</div>
+                <div class="t-details">
+                    Palpite: <strong>${meuPalpite}</strong> (Odd: ${oddAtual.toFixed(2)}) | Investido: R$ ${val.toFixed(2)}<br>
+                    Placar de Campo: <em>Vencedor (${nomeRes})</em>
+                </div>
+                <span class="t-badge ${venceu ? 'bg-green' : 'bg-red'}">
+                    ${venceu ? `+R$ ${lucro.toFixed(2)}` : 'Perdido'}
+                </span>
+            `;
+            list.insertBefore(item, list.firstChild);
+
+            toggleUI(true);
+            resetSelection();
+        }, 1500);
+    }
+</script>
+ <footer>
+        copyright - Etec MCM - Arte Digital - Gabriel Souza - Gabriel Prado - Jonas - Guilherme - Arthur Arlindo
+    </footer>
+</body>
+</html>
